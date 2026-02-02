@@ -37,12 +37,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox2.com
-            keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
-            signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
-            encrPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            encrPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
+            signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            signingPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
+            encrPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            encrPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
         schemaValidator:
           id: schemav2validator
           config:
@@ -89,12 +89,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox2.com
-            keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
-            signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
-            encrPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            encrPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
+            signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            signingPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
+            encrPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            encrPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
         schemaValidator:
           id: schemav2validator
           config:
@@ -161,12 +161,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox2.com
-            keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
-            signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
-            encrPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            encrPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
+            signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            signingPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
+            encrPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            encrPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
         schemaValidator:
           id: schemav2validator
           config:
@@ -219,12 +219,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox2.com
-            keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
-            signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
-            encrPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
-            encrPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
+            signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            signingPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
+            encrPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
+            encrPublicKey: YCBCnnuAwGLivRFDH7nTOEe3a9SCgkJiYDSj6adJhKQ=
         schemaValidator:
           id: schemav2validator
           config:

@@ -37,12 +37,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox1.com
-            keyId: 76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ
-            signingPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            signingPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
-            encrPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            encrPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw
+            signingPrivateKey: MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=
+            signingPublicKey: clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=
+            encrPrivateKey: MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=
+            encrPublicKey: clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=
         schemaValidator:
           id: schemav2validator
           config:
@@ -107,12 +107,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox1.com
-            keyId: 76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ
-            signingPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            signingPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
-            encrPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            encrPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
+            networkParticipant: isp2p.yocharge.com
+            keyId: 76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw
+            signingPrivateKey: MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=
+            signingPublicKey: clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=
+            encrPrivateKey: MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=
+            encrPublicKey: clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=
         schemaValidator:
           id: schemav2validator
           config:
