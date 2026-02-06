@@ -154,6 +154,30 @@
           }
         }
       ],
+      "beckn:orderValue": {
+        "currency": "USD",
+        "value": 4.25,
+        "components": [
+          {
+            "type": "UNIT",
+            "value": 4.05,
+            "currency": "USD",
+            "description": "Energy value (15 kWh × $0.15 + 10 kWh × $0.18)"
+          },
+          {
+            "type": "FEE",
+            "value": 0.08,
+            "currency": "USD",
+            "description": "Buyer platform fee (2%)"
+          },
+          {
+            "type": "FEE",
+            "value": 0.12,
+            "currency": "USD",
+            "description": "Seller platform fee (3%)"
+          }
+        ]
+      },
       "beckn:fulfillment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
         "@type": "beckn:Fulfillment",
@@ -166,8 +190,9 @@
         "beckn:id": "payment-p2p-energy-001",
         "beckn:amount": {
           "currency": "USD",
-          "value": 4.05
+          "value": 4.25
         },
+        "beckn:acceptedPaymentMethod": ["UPI", "BANK_TRANSFER", "WALLET"],
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "AUTHORIZED",
         "beckn:paymentAttributes": {
