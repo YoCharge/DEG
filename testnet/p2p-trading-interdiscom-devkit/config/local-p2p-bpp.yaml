@@ -134,9 +134,9 @@ modules:
               enabled: "true"
               asyncTimeout: "30000"
               # Signing config (same keys as simplekeymanager)
-              signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
+              signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
               networkParticipant: p2p-trading-sandbox2.com
-              keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
+              keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
       steps:
         - addRoute
         - sign

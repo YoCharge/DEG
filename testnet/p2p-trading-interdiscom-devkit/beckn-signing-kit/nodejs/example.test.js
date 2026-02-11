@@ -9,9 +9,9 @@ describe('usage examples', () => {
     // 1. Configure the signer with your keys from the YAML config.
     //    These come from the simplekeymanager / degledgerrecorder config.
     const signer = new PayloadSigner({
-      subscriberId: 'p2p-trading-sandbox1.com',
-      uniqueKeyId: '76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ',
-      signingPrivateKey: 'Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=',
+      subscriberId: 'isp2p.yocharge.com',
+      uniqueKeyId: '76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw',
+      signingPrivateKey: 'MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=',
     });
 
     // 2. Your beckn JSON payload (confirm, on_confirm, on_status, etc.)
@@ -19,7 +19,7 @@ describe('usage examples', () => {
       context: {
         action: 'confirm',
         domain: 'beckn.one:deg:p2p-trading:2.0.0',
-        bap_id: 'bap.energy-consumer.com',
+        bap_id: 'isp2p.yocharge.com',
       },
       message: {
         order: { '@type': 'beckn:Order', 'beckn:orderStatus': 'CREATED' },
@@ -28,6 +28,8 @@ describe('usage examples', () => {
 
     // 3. Sign it — this is the entire SDK surface.
     const authHeader = signer.signPayload(payload);
+
+    console.log('authHeader', authHeader);
 
     // 4. Attach to HTTP request (e.g., posting to ledger service).
     //    const res = await fetch('https://ledger.example.com/record', {
@@ -39,7 +41,7 @@ describe('usage examples', () => {
     //      body: payload,
     //    });
 
-    assert.ok(authHeader.startsWith('Signature keyId="p2p-trading-sandbox1.com|76EU8aUq'));
+    assert.ok(authHeader.startsWith('Signature keyId="isp2p.yocharge.com|76EU7xnK'));
   });
 
   it('verify an incoming signed request', () => {
@@ -47,14 +49,14 @@ describe('usage examples', () => {
 
     // Sender side: sign
     const signer = new PayloadSigner({
-      subscriberId: 'p2p-trading-sandbox1.com',
-      uniqueKeyId: '76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ',
-      signingPrivateKey: 'Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=',
+      subscriberId: 'isp2p.yocharge.com',
+      uniqueKeyId: '76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw',
+      signingPrivateKey: 'MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=',
     });
     const authHeader = signer.signPayload(payload);
 
     // Receiver side: verify (look up public key from registry)
-    const senderPublicKey = 'KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=';
+    const senderPublicKey = 'clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=';
     verify(payload, authHeader, senderPublicKey); // throws on failure
 
     assert.ok(true, 'Signature valid!');

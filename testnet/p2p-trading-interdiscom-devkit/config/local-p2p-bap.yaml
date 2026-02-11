@@ -80,9 +80,9 @@ modules:
               enabled: "true"
               asyncTimeout: "30000"
               # Signing config (same keys as simplekeymanager)
-              signingPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-              networkParticipant: p2p-trading-sandbox1.com
-              keyId: 76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ
+              signingPrivateKey: MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=
+              networkParticipant: isp2p.yocharge.com
+              keyId: 76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw
       steps:
         - validateSign
         - addRoute

@@ -20,7 +20,7 @@ const crypto = require('crypto');
 // PKCS8 DER prefix for Ed25519 private key (wraps 32-byte seed).
 const PKCS8_ED25519_PREFIX = Buffer.from('302e020100300506032b657004220420', 'hex');
 
-const DEFAULT_EXPIRY_SECONDS = 300; // 5 minutes
+const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour
 
 class PayloadSigner {
   /**

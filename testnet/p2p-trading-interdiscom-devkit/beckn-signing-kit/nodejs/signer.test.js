@@ -6,10 +6,10 @@ const crypto = require('crypto');
 const { PayloadSigner, verify, verifyAt, parseKeyId } = require('./index');
 
 // Test keys matching the config in local-p2p-bap.yaml (sandbox1).
-const TEST_SUBSCRIBER_ID = 'p2p-trading-sandbox1.com';
-const TEST_KEY_ID = '76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ';
-const TEST_PRIVATE_KEY = 'Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=';
-const TEST_PUBLIC_KEY = 'KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=';
+const TEST_SUBSCRIBER_ID = 'isp2p.yocharge.com';
+const TEST_KEY_ID = '76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw';
+const TEST_PRIVATE_KEY = 'MPYM21Z4Kb4/2nfozOoiu4Uq3dL3EDlOzJsEO+IFrRg=';
+const TEST_PUBLIC_KEY = 'clTfwZEaLiF3JT3sQ/mu66l4TjU5RJbCBxKk6x0uTww=';
 
 // Sample beckn payload (trimmed confirm request).
 const samplePayload = Buffer.from(JSON.stringify({
@@ -121,6 +121,7 @@ describe('PayloadSigner', () => {
 
       // Both should produce valid signatures (can't compare directly due to timestamp)
       const authHeader = signer.signPayload(payloadStr);
+      console.log('authHeader124', authHeader);
       assert.ok(authHeader.startsWith('Signature '));
     });
   });
@@ -193,10 +194,10 @@ describe('verifyAt', () => {
 
 describe('parseKeyId', () => {
   it('parses a valid keyId', () => {
-    const result = parseKeyId('p2p-trading-sandbox1.com|76EU8aUq|ed25519');
+    const result = parseKeyId('isp2p.yocharge.com|76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw|ed25519');
     assert.deepEqual(result, {
-      subscriberId: 'p2p-trading-sandbox1.com',
-      uniqueKeyId: '76EU8aUq',
+      subscriberId: 'isp2p.yocharge.com',
+      uniqueKeyId: '76EU7xnKG51fhr9F5jvjF9KBfryJoqSucQfiwPHJMXWpqLL2rXybCw',
       algorithm: 'ed25519',
     });
   });
