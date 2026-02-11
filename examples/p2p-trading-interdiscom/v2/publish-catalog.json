@@ -97,6 +97,7 @@
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-energy-001",
+            "beckn:isActive": true,
             "beckn:descriptor": {
               "@type": "beckn:Descriptor",
               "schema:name": "Solar Energy Offer - Morning Slot"
@@ -107,8 +108,8 @@
             ],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
-              "schema:price": 0.15,
-              "schema:priceCurrency": "USD",
+              "schema:price": 15,
+              "schema:priceCurrency": "INR",
               "unitText": "kWh",
               "applicableQuantity": {
                 "unitQuantity": 30.5,
@@ -135,6 +136,7 @@
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-energy-002",
+            "beckn:isActive": true,
             "beckn:descriptor": {
               "@type": "beckn:Descriptor",
               "schema:name": "Solar Energy Offer - Afternoon Slot"
@@ -145,8 +147,8 @@
             ],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
-              "schema:price": 0.12,
-              "schema:priceCurrency": "USD",
+              "schema:price": 12,
+              "schema:priceCurrency": "INR",
               "unitText": "kWh",
               "applicableQuantity": {
                 "unitQuantity": 50.0,

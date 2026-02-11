@@ -62,6 +62,7 @@
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-morning-001",
+            "beckn:isActive": true,
             "beckn:descriptor": {
               "@type": "beckn:Descriptor",
               "schema:name": "Morning Solar Energy Offer - 6am-12pm"
@@ -100,6 +101,7 @@
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-afternoon-001",
+            "beckn:isActive": true,
             "beckn:descriptor": {
               "@type": "beckn:Descriptor",
               "schema:name": "Afternoon Solar Energy Offer - 12pm-6pm"
