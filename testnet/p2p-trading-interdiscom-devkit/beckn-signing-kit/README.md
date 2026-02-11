@@ -94,6 +94,25 @@ const authHeader = signer.signPayload(payloadJson);
 
 **Run tests:** `cd nodejs && node --test`
 
+### [Python](./python/)
+
+Requires Python 3.10+ and the `cryptography` library.
+
+```python
+from python import PayloadSigner
+
+signer = PayloadSigner(
+    subscriber_id='p2p-trading-sandbox1.com',
+    unique_key_id='76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ',
+    signing_private_key='Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=',
+)
+
+auth_header = signer.sign_payload(payload_json)
+# Set on HTTP request: headers['Authorization'] = auth_header
+```
+
+**Run tests:** `cd python && pip install -e '.[test]' && pytest -v`
+
 ## Verification (optional)
 
 All SDKs also include a verifier to validate incoming signed requests:
@@ -112,4 +131,10 @@ PayloadVerifier.Verify(body, authHeader, senderPublicKey);
 // Node.js
 const { verify } = require('@beckn/deg-discom-signing-kit');
 verify(body, authHeader, senderPublicKey); // throws on failure
+```
+
+```python
+# Python
+from python import verify
+verify(body, auth_header, sender_public_key)  # raises on failure
 ```
