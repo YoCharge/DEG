@@ -72,12 +72,15 @@ modules:
               uuidKeys: transaction_id,message_id
               role: bap
         steps:
+          - id: policyenforcer
+            config:
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/p2p-trading/specification/policies/p2p-trading-interdiscom.rego"
           - id: degledgerrecorder
             config:
               # ledgerHost: "https://34.93.166.38.sslip.io" OLD URL
               ledgerHost: "https://ies-p2p-energy-ledger.beckn.io"
               role: "BUYER"
-              actions: "on_confirm,on_status"  # Handle both actions 
+              actions: "on_confirm,on_status"  # Handle both actions
               enabled: "true"
               asyncTimeout: "30000"
               # Signing config (same keys as simplekeymanager)
@@ -88,6 +91,7 @@ modules:
         - validateSign
         - addRoute
         - validateSchema
+        - policyenforcer
         - degledgerrecorder
 
   - name: bapTxnCaller
@@ -144,7 +148,12 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          - id: policyenforcer
+            config:
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/p2p-trading/specification/policies/p2p-trading-interdiscom.rego"
       steps:
         - addRoute
         - sign
         - validateSchema
+        - policyenforcer

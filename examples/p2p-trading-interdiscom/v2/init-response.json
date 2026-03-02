@@ -25,9 +25,9 @@
         "beckn:buyerAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
           "@type": "EnergyCustomer",
-          "meterId": "der://meter/98765456",
-          "utilityCustomerId": "BESCOM-CUST-001",
-          "utilityId": "BESCOM-KA"
+          "meterId": "TEST_METER_BUYER",
+          "utilityCustomerId": "TEST-CUST-BUYER-001",
+          "utilityId": "TEST_DISCOM_BUYER"
         }
       },
       "beckn:orderAttributes": {
@@ -53,9 +53,9 @@
             "providerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
               "@type": "EnergyCustomer",
-              "meterId": "der://meter/98765456",
-              "utilityCustomerId": "BESCOM-CUST-001",
-              "utilityId": "BESCOM-KA"
+              "meterId": "TEST_METER_SELLER",
+              "utilityCustomerId": "TEST-CUST-SELLER-001",
+              "utilityId": "TEST_DISCOM_SELLER"
             }
           },
           "beckn:acceptedOffer": {
@@ -72,8 +72,8 @@
             ],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
-              "schema:price": 0.15,
-              "schema:priceCurrency": "USD",
+              "schema:price": 15,
+              "schema:priceCurrency": "INR",
               "unitText": "kWh",
               "applicableQuantity": {
                 "unitQuantity": 20.0,
@@ -86,13 +86,13 @@
               "pricingModel": "PER_KWH",
               "deliveryWindow": {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-09T06:00:00Z",
-                "schema:endTime": "2026-01-09T12:00:00Z"
+                "schema:startTime": "2026-01-09T10:00:00Z",
+                "schema:endTime": "2026-01-09T11:00:00Z"
               },
               "validityWindow": {
                 "@type": "beckn:TimePeriod",
                 "schema:startTime": "2026-01-09T00:00:00Z",
-                "schema:endTime": "2026-01-09T05:00:00Z"
+                "schema:endTime": "2026-01-09T06:00:00Z"
               }
             }
           }
@@ -109,9 +109,9 @@
             "providerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
               "@type": "EnergyCustomer",
-              "meterId": "der://meter/98765456",
-              "utilityCustomerId": "BESCOM-CUST-001",
-              "utilityId": "BESCOM-KA"
+              "meterId": "TEST_METER_SELLER",
+              "utilityCustomerId": "TEST-CUST-SELLER-001",
+              "utilityId": "TEST_DISCOM_SELLER"
             }
           },
           "beckn:acceptedOffer": {
@@ -128,8 +128,8 @@
             ],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
-              "schema:price": 0.18,
-              "schema:priceCurrency": "USD",
+              "schema:price": 18,
+              "schema:priceCurrency": "INR",
               "unitText": "kWh",
               "applicableQuantity": {
                 "unitQuantity": 15.0,
@@ -142,22 +142,22 @@
               "pricingModel": "PER_KWH",
               "deliveryWindow": {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-09T12:00:00Z",
-                "schema:endTime": "2026-01-09T18:00:00Z"
+                "schema:startTime": "2026-01-09T14:00:00Z",
+                "schema:endTime": "2026-01-09T15:00:00Z"
               },
               "validityWindow": {
                 "@type": "beckn:TimePeriod",
                 "schema:startTime": "2026-01-09T00:00:00Z",
-                "schema:endTime": "2026-01-09T11:00:00Z"
+                "schema:endTime": "2026-01-09T10:00:00Z"
               }
             }
           }
         }
       ],
       "beckn:orderValue": {
-        "currency": "USD",
-        "value": 4.05,
-        "description": "Inter-platform settlement at catalog prices (15 kWh × $0.15 + 10 kWh × $0.18). Catalog prices are inclusive of seller platform charges."
+        "currency": "INR",
+        "value": 405,
+        "description": "Inter-platform settlement at catalog prices (15 kWh × ₹15 + 10 kWh × ₹18). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:fulfillment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
@@ -170,10 +170,14 @@
         "@type": "beckn:Payment",
         "beckn:id": "payment-p2p-energy-001",
         "beckn:amount": {
-          "currency": "USD",
-          "value": 4.05
+          "currency": "INR",
+          "value": 405
         },
-        "beckn:acceptedPaymentMethod": ["UPI", "BANK_TRANSFER", "WALLET"],
+        "beckn:acceptedPaymentMethod": [
+          "UPI",
+          "BANK_TRANSFER",
+          "WALLET"
+        ],
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "AUTHORIZED"
       }

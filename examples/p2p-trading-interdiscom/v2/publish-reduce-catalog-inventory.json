@@ -29,7 +29,7 @@
           {
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
-            "beckn:networkId": ["p2p-interdiscom-trading-pilot-network"],
+            "beckn:networkId": ["p2p-interdiscom-trading-test-network"],
             "beckn:isActive": true,
             "beckn:id": "energy-resource-solar-001",
             "beckn:descriptor": {
@@ -47,22 +47,22 @@
               "beckn:providerAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
                 "@type": "EnergyCustomer",
-                "meterId": "der://meter/100200300",
-                "utilityId": "TPDDL-DL",
-                "utilityCustomerId": "TPDDL-CUST-001"
+                "meterId": "TEST_METER_SELLER",
+                "utilityId": "TEST_DISCOM_SELLER",
+                "utilityCustomerId": "TEST-CUST-SELLER-001"
               }
             },
             "beckn:itemAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
               "@type": "EnergyResource",
               "sourceType": "SOLAR",
-              "meterId": "der://meter/100200300"
+              "meterId": "TEST_METER_SELLER"
             }
           },
           {
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
-            "beckn:networkId": ["p2p-interdiscom-trading-pilot-network"],
+            "beckn:networkId": ["p2p-interdiscom-trading-test-network"],
             "beckn:isActive": true,
             "beckn:id": "energy-resource-solar-002",
             "beckn:descriptor": {
@@ -80,16 +80,16 @@
               "beckn:providerAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
                 "@type": "EnergyCustomer",
-                "meterId": "der://meter/100200301",
-                "utilityId": "TPDDL-DL",
-                "utilityCustomerId": "TPDDL-CUST-001"
+                "meterId": "TEST_METER_SELLER",
+                "utilityId": "TEST_DISCOM_SELLER",
+                "utilityCustomerId": "TEST-CUST-SELLER-001"
               }
             },
             "beckn:itemAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
               "@type": "EnergyResource",
               "sourceType": "SOLAR",
-              "meterId": "der://meter/100200301"
+              "meterId": "TEST_METER_SELLER"
             }
           }
         ],

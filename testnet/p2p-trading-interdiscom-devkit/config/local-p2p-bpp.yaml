@@ -66,10 +66,15 @@ modules:
           id: router
           config:
             routingConfig: ./config/local-p2p-routing-SellerBPPReceiver-from-BuyerBAP.yaml
+        steps:
+          - id: policyenforcer
+            config:
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/p2p-trading/specification/policies/p2p-trading-interdiscom.rego"
       steps:
         - validateSign
         - addRoute
         - validateSchema
+        - policyenforcer
 
   - name: bppTxnCaller
     path: /bpp/caller/
@@ -138,11 +143,15 @@ modules:
               signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
               networkParticipant: p2p-trading-sandbox2.com
               keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
+          - id: policyenforcer
+            config:
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/p2p-trading/specification/policies/p2p-trading-interdiscom.rego"
       steps:
         - addRoute
         - sign
         - validateSchema
         - degledgerrecorder
+        - policyenforcer
   
   # BAP Modules: For cascaded calls to utility BPP
   # This module receives responses FROM utility BPP (on_init, on_confirm, on_update)

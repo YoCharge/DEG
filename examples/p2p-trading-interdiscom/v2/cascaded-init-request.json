@@ -25,9 +25,9 @@
         "beckn:buyerAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
           "@type": "EnergyCustomer",
-          "meterId": "der://meter/98765456",
-          "utilityCustomerId": "BESCOM-CUST-001",
-          "utilityId": "BESCOM-KA"
+          "meterId": "TEST_METER_BUYER",
+          "utilityCustomerId": "TEST-CUST-BUYER-001",
+          "utilityId": "TEST_DISCOM_BUYER"
         }
       },
       "beckn:orderAttributes": {
@@ -53,9 +53,9 @@
             "providerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
               "@type": "EnergyCustomer",
-              "meterId": "der://meter/98765456",
-              "utilityCustomerId": "BESCOM-CUST-001",
-              "utilityId": "BESCOM-KA"
+              "meterId": "TEST_METER_SELLER",
+              "utilityCustomerId": "TEST-CUST-SELLER-001",
+              "utilityId": "TEST_DISCOM_SELLER"
             }
           },
           "beckn:acceptedOffer": {
@@ -72,8 +72,8 @@
             ],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
-              "schema:price": 0.15,
-              "schema:priceCurrency": "USD",
+              "schema:price": 15,
+              "schema:priceCurrency": "INR",
               "unitText": "kWh",
               "applicableQuantity": {
                 "unitQuantity": 20.0,
@@ -86,13 +86,13 @@
               "pricingModel": "PER_KWH",
               "deliveryWindow": {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-09T06:00:00Z",
-                "schema:endTime": "2026-01-09T12:00:00Z"
+                "schema:startTime": "2026-01-09T10:00:00Z",
+                "schema:endTime": "2026-01-09T11:00:00Z"
               },
               "validityWindow": {
                 "@type": "beckn:TimePeriod",
                 "schema:startTime": "2026-01-09T00:00:00Z",
-                "schema:endTime": "2026-01-09T05:00:00Z"
+                "schema:endTime": "2026-01-09T06:00:00Z"
               }
             }
           }
@@ -109,8 +109,8 @@
         "@type": "beckn:Payment",
         "beckn:id": "payment-cascaded-p2p-energy-001",
         "beckn:amount": {
-          "currency": "USD",
-          "value": 2.25
+          "currency": "INR",
+          "value": 225
         },
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "INITIATED",

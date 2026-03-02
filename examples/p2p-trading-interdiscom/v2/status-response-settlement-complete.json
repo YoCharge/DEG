@@ -26,9 +26,9 @@
         "beckn:buyerAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld",
           "@type": "EnergyCustomer",
-          "meterId": "der://meter/98765456",
-          "utilityCustomerId": "BESCOM-CUST-001",
-          "utilityId": "BESCOM-KA"
+          "meterId": "TEST_METER_BUYER",
+          "utilityCustomerId": "TEST-CUST-BUYER-001",
+          "utilityId": "TEST_DISCOM_BUYER"
         }
       },
       "beckn:orderItems": [
@@ -47,7 +47,9 @@
               "schema:name": "Morning Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": ["energy-resource-solar-001"]
+            "beckn:items": [
+              "energy-resource-solar-001"
+            ]
           }
         },
         {
@@ -65,22 +67,24 @@
               "schema:name": "Afternoon Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": ["energy-resource-solar-001"]
+            "beckn:items": [
+              "energy-resource-solar-001"
+            ]
           }
         }
       ],
       "beckn:orderValue": {
-        "currency": "USD",
-        "value": 4.05,
-        "description": "Inter-platform settlement at catalog prices (15 kWh × $0.15 + 10 kWh × $0.18). Catalog prices are inclusive of seller platform charges."
+        "currency": "INR",
+        "value": 405,
+        "description": "Inter-platform settlement at catalog prices (15 kWh × ₹15 + 10 kWh × ₹18). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
         "@type": "beckn:Payment",
         "beckn:id": "payment-p2p-energy-001",
         "beckn:amount": {
-          "currency": "USD",
-          "value": 4.05
+          "currency": "INR",
+          "value": 405
         },
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "SETTLED",
