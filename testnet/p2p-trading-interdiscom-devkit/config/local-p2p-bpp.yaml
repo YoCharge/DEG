@@ -141,7 +141,7 @@ modules:
               asyncTimeout: "30000"
               # Signing config (same keys as simplekeymanager)
               signingPrivateKey: Ki8GYYne0qfG5DhWKc4y2AsTPWmWO5xOtrHdg/a57X0=
-              networkParticipant: p2p-trading-sandbox2.com
+              networkParticipant: isp2p.yocharge.com
               keyId: 76EU8wmZV8JtmazyGMkpTK3afCdsZ568rJnSTNg4qmZS6vd4HA5EkY
           - id: policyenforcer
             config:
