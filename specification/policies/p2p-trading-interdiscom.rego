@@ -38,18 +38,33 @@ import rego.v1
 # O12. EnergyTradeOffer @context: when offer @type is "EnergyTradeOffer",
 #      @context must match the same URL.
 #
-# ── catalog_publish action (catalog item validation) ──
+# ── catalog_publish action (catalog item & offer validation) ──
 #
 # P1. Production network items: beckn:providerAttributes must exist, utilityId
 #     must be an approved DISCOM (TPDDL, PVVNL, BRPL).
 # P2. Non-production network items: provider meterId must be TEST_METER_SELLER,
 #     provider utilityId must be TEST_DISCOM_SELLER.
+# P3. Validity-to-delivery gap: on each catalog offer, validity window end must
+#     be at least minDeliveryLeadHours before delivery window start (mirrors O2).
+# P3b. [DISABLED] Delivery slot duration: delivery window must be exactly 1 hour
+#      (mirrors O3).
+# P4. Currency: each catalog offer's schema:priceCurrency must be "INR" (mirrors O6).
+# P5. Quantity unit: each catalog offer's applicableQuantity.unitText must be
+#     "kWh" (mirrors O7).
+# P6. Provider utilityCustomerId must be present and non-empty (mirrors O8).
+# P7. Provider utilityId must be present and non-empty (mirrors O8).
+# P8. Provider @type must be "EnergyCustomer" (mirrors O9).
+# P9. Provider EnergyCustomer @context must match the P2P energy trading
+#     JSON-LD context URL (mirrors O10).
+# P10. EnergyTradeOffer @context: when offerAttributes @type is
+#      "EnergyTradeOffer", @context must match the same URL (mirrors O12).
 #
 # ── test ID consistency (when message.order exists) ──
 #
-# T1. If any provider uses test identifiers (meterId or utilityId starting
-#     with "TEST_"), the buyer must also use test values:
-#     TEST_METER_BUYER and TEST_DISCOM_BUYER.
+# T1. If ANY party (buyer OR any provider) uses a test identifier (meterId
+#     or utilityId starting with "TEST_"), ALL parties must use test values:
+#       buyer    → meterId = TEST_METER_BUYER, utilityId = TEST_DISCOM_BUYER
+#       provider → meterId and utilityId must each start with "TEST_"
 #
 # Config:
 #   data.config.minDeliveryLeadHours  - minimum hours of lead time (default: 4)
@@ -224,10 +239,10 @@ _order_violations contains msg if {
 	item := input.message.order["beckn:orderItems"][i]
 	qty := item["beckn:quantity"].unitQuantity
 	cap := item["beckn:acceptedOffer"]["beckn:price"].applicableQuantity.unitQuantity
-	qty >= cap
+	qty > cap
 
 	msg := sprintf(
-		"order item [%d]: beckn:quantity.unitQuantity (%v) must be less than applicableQuantity (%v)",
+		"order item [%d]: beckn:quantity.unitQuantity (%v) must not be greater than the applicableQuantity (%v)",
 		[i, qty, cap],
 	)
 }
@@ -324,146 +339,217 @@ _order_violations contains msg if {
 	)
 }
 
-# Rule 10a – Buyer attributes @type must be "EnergyCustomer"
-_buyer_type := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]["@type"]
+# ===== Domain-specific @type and @context validation (EnergyTrade) =====
+#
+# Dual rules at known JSON locations for EnergyTrade extension types:
+#   (1) Object at a known path must have the expected @type.
+#   (2) Object with that @type must have the EnergyTrade @context URL.
+#
+# Order locations:
+#   beckn:buyer.beckn:buyerAttributes                              → EnergyCustomer
+#   beckn:orderAttributes                                          → EnergyTradeOrder
+#   beckn:orderItems[*].beckn:orderItemAttributes.providerAttributes → EnergyCustomer
+#   beckn:orderItems[*].beckn:acceptedOffer.beckn:offerAttributes   → EnergyTradeOffer
+#
+# Catalog locations (in _publish_violations):
+#   beckn:items[*].beckn:provider.beckn:providerAttributes          → EnergyCustomer
+#   beckn:items[*].beckn:itemAttributes                             → EnergyResource
+#   beckn:offers[*].beckn:offerAttributes                           → EnergyTradeOffer
 
-_order_violations contains "buyer beckn:buyerAttributes @type is missing; must be EnergyCustomer" if {
-	not _buyer_type
+_energytrade_context := "https://raw.githubusercontent.com/beckn/DEG/tags/deg-1.0.0/specification/schema/EnergyTrade/v0.3/context.jsonld"
+
+# --- Order domain: beckn:buyerAttributes → EnergyCustomer ---
+
+_order_violations contains msg if {
+	obj := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
+	msg := _wrong_type("buyer beckn:buyerAttributes", obj, "EnergyCustomer")
 }
 
 _order_violations contains msg if {
-	_buyer_type
-	_buyer_type != "EnergyCustomer"
-
-	msg := sprintf(
-		"buyer beckn:buyerAttributes @type is %q; must be EnergyCustomer",
-		[_buyer_type],
-	)
-}
-
-# Rule 10b – Provider attributes @type must be "EnergyCustomer" per order item
-_order_violations contains msg if {
-	item := input.message.order["beckn:orderItems"][i]
-	provider := item["beckn:orderItemAttributes"].providerAttributes
-	not provider["@type"]
-
-	msg := sprintf(
-		"order item [%d]: providerAttributes @type is missing; must be EnergyCustomer",
-		[i],
-	)
+	obj := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
+	msg := _missing_type("buyer beckn:buyerAttributes", obj, "EnergyCustomer")
 }
 
 _order_violations contains msg if {
-	item := input.message.order["beckn:orderItems"][i]
-	provider := item["beckn:orderItemAttributes"].providerAttributes
-	provider["@type"]
-	provider["@type"] != "EnergyCustomer"
-
-	msg := sprintf(
-		"order item [%d]: providerAttributes @type is %q; must be EnergyCustomer",
-		[i, provider["@type"]],
-	)
-}
-
-
-# ===== JSON-LD @context validation =====
-
-_required_context := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/p2p-trading/schema/EnergyTrade/v0.3/context.jsonld"
-
-# Rule 15a – Buyer EnergyCustomer @context
-_order_violations contains msg if {
-	buyer_attrs := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
-	buyer_attrs["@type"] == "EnergyCustomer"
-	buyer_attrs["@context"] != _required_context
-
-	msg := sprintf(
-		"buyer EnergyCustomer @context is %q; must be %q",
-		[buyer_attrs["@context"], _required_context],
-	)
+	obj := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
+	msg := _wrong_context("buyer beckn:buyerAttributes", obj, "EnergyCustomer", _energytrade_context)
 }
 
 _order_violations contains msg if {
-	buyer_attrs := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
-	buyer_attrs["@type"] == "EnergyCustomer"
-	not buyer_attrs["@context"]
-
-	msg := sprintf(
-		"buyer EnergyCustomer @context is missing; must be %q",
-		[_required_context],
-	)
+	obj := input.message.order["beckn:buyer"]["beckn:buyerAttributes"]
+	msg := _missing_context("buyer beckn:buyerAttributes", obj, "EnergyCustomer", _energytrade_context)
 }
 
-# Rule 15b – Provider EnergyCustomer @context per order item
+# --- Order domain: beckn:orderAttributes → EnergyTradeOrder ---
+
+_order_violations contains msg if { msg := _wrong_type("message.order.beckn:orderAttributes", input.message.order["beckn:orderAttributes"], "EnergyTradeOrder") }
+
+_order_violations contains msg if { msg := _missing_type("message.order.beckn:orderAttributes", input.message.order["beckn:orderAttributes"], "EnergyTradeOrder") }
+
+_order_violations contains msg if { msg := _wrong_context("message.order.beckn:orderAttributes", input.message.order["beckn:orderAttributes"], "EnergyTradeOrder", _energytrade_context) }
+
+_order_violations contains msg if { msg := _missing_context("message.order.beckn:orderAttributes", input.message.order["beckn:orderAttributes"], "EnergyTradeOrder", _energytrade_context) }
+
+# --- Order domain: providerAttributes → EnergyCustomer ---
+
 _order_violations contains msg if {
 	item := input.message.order["beckn:orderItems"][i]
-	provider := item["beckn:orderItemAttributes"].providerAttributes
-	provider["@type"] == "EnergyCustomer"
-	provider["@context"] != _required_context
-
-	msg := sprintf(
-		"order item [%d]: provider EnergyCustomer @context is %q; must be %q",
-		[i, provider["@context"], _required_context],
-	)
+	obj := item["beckn:orderItemAttributes"].providerAttributes
+	msg := _wrong_type(sprintf("order item [%d] providerAttributes", [i]), obj, "EnergyCustomer")
 }
 
 _order_violations contains msg if {
 	item := input.message.order["beckn:orderItems"][i]
-	provider := item["beckn:orderItemAttributes"].providerAttributes
-	provider["@type"] == "EnergyCustomer"
-	not provider["@context"]
-
-	msg := sprintf(
-		"order item [%d]: provider EnergyCustomer @context is missing; must be %q",
-		[i, _required_context],
-	)
-}
-
-# Rule 16 – EnergyTradeOrder @context
-_order_violations contains msg if {
-	order := input.message.order
-	order["@type"] == "EnergyTradeOrder"
-	order["@context"] != _required_context
-
-	msg := sprintf(
-		"EnergyTradeOrder @context is %q; must be %q",
-		[order["@context"], _required_context],
-	)
-}
-
-_order_violations contains msg if {
-	order := input.message.order
-	order["@type"] == "EnergyTradeOrder"
-	not order["@context"]
-
-	msg := sprintf(
-		"EnergyTradeOrder @context is missing; must be %q",
-		[_required_context],
-	)
-}
-
-# Rule 17 – EnergyTradeOffer @context per order item
-_order_violations contains msg if {
-	item := input.message.order["beckn:orderItems"][i]
-	offer := item["beckn:acceptedOffer"]
-	offer["@type"] == "EnergyTradeOffer"
-	offer["@context"] != _required_context
-
-	msg := sprintf(
-		"order item [%d]: EnergyTradeOffer @context is %q; must be %q",
-		[i, offer["@context"], _required_context],
-	)
+	obj := item["beckn:orderItemAttributes"].providerAttributes
+	msg := _missing_type(sprintf("order item [%d] providerAttributes", [i]), obj, "EnergyCustomer")
 }
 
 _order_violations contains msg if {
 	item := input.message.order["beckn:orderItems"][i]
-	offer := item["beckn:acceptedOffer"]
-	offer["@type"] == "EnergyTradeOffer"
-	not offer["@context"]
+	obj := item["beckn:orderItemAttributes"].providerAttributes
+	msg := _wrong_context(sprintf("order item [%d] providerAttributes", [i]), obj, "EnergyCustomer", _energytrade_context)
+}
 
-	msg := sprintf(
-		"order item [%d]: EnergyTradeOffer @context is missing; must be %q",
-		[i, _required_context],
-	)
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:orderItemAttributes"].providerAttributes
+	msg := _missing_context(sprintf("order item [%d] providerAttributes", [i]), obj, "EnergyCustomer", _energytrade_context)
+}
+
+# --- Order domain: beckn:offerAttributes → EnergyTradeOffer ---
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]["beckn:offerAttributes"]
+	msg := _wrong_type(sprintf("order item [%d] beckn:offerAttributes", [i]), obj, "EnergyTradeOffer")
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]["beckn:offerAttributes"]
+	msg := _missing_type(sprintf("order item [%d] beckn:offerAttributes", [i]), obj, "EnergyTradeOffer")
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]["beckn:offerAttributes"]
+	msg := _wrong_context(sprintf("order item [%d] beckn:offerAttributes", [i]), obj, "EnergyTradeOffer", _energytrade_context)
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]["beckn:offerAttributes"]
+	msg := _missing_context(sprintf("order item [%d] beckn:offerAttributes", [i]), obj, "EnergyTradeOffer", _energytrade_context)
+}
+
+# ===== Core @type and @context dual enforcement =====
+#
+# Dual rules at known JSON locations:
+#   (1) Object at a known path must have the expected @type.
+#   (2) Object with a core beckn @type must have the core @context URL.
+#
+# Order locations (gated via _order_violations):
+#   message.order                                        → beckn:Order
+#   message.order.beckn:buyer                            → beckn:Buyer
+#   message.order.beckn:fulfillment                      → beckn:Fulfillment
+#   message.order.beckn:orderItems[*].beckn:acceptedOffer → beckn:Offer
+#
+# Catalog locations (gated via _publish_violations):
+#   message.catalogs[*]                    → beckn:Catalog
+#   message.catalogs[*].beckn:items[*]     → beckn:Item
+#   message.catalogs[*].beckn:offers[*]    → beckn:Offer
+
+core_context_url := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld"
+
+# --- Helper functions (return a violation string, or are undefined) ---
+
+_wrong_type(path, obj, expected) := sprintf(
+	"%s: @type is %q; must be %q",
+	[path, obj["@type"], expected],
+) if {
+	obj["@type"]
+	obj["@type"] != expected
+}
+
+_missing_type(path, obj, expected) := sprintf(
+	"%s: @type is missing; must be %q",
+	[path, expected],
+) if {
+	is_object(obj)
+	not obj["@type"]
+}
+
+_wrong_context(path, obj, expected_type, ctx_url) := sprintf(
+	"%s: %s @context is %q; must be %q",
+	[path, expected_type, obj["@context"], ctx_url],
+) if {
+	obj["@type"] == expected_type
+	obj["@context"]
+	obj["@context"] != ctx_url
+}
+
+_missing_context(path, obj, expected_type, ctx_url) := sprintf(
+	"%s: %s @context is missing; must be %q",
+	[path, expected_type, ctx_url],
+) if {
+	obj["@type"] == expected_type
+	not obj["@context"]
+}
+
+# --- Order location: message.order → beckn:Order ---
+
+_order_violations contains msg if { msg := _wrong_type("message.order", input.message.order, "beckn:Order") }
+
+_order_violations contains msg if { msg := _missing_type("message.order", input.message.order, "beckn:Order") }
+
+_order_violations contains msg if { msg := _wrong_context("message.order", input.message.order, "beckn:Order", core_context_url) }
+
+_order_violations contains msg if { msg := _missing_context("message.order", input.message.order, "beckn:Order", core_context_url) }
+
+# --- Order location: message.order.beckn:buyer → beckn:Buyer ---
+
+_order_violations contains msg if { msg := _wrong_type("message.order.beckn:buyer", input.message.order["beckn:buyer"], "beckn:Buyer") }
+
+_order_violations contains msg if { msg := _missing_type("message.order.beckn:buyer", input.message.order["beckn:buyer"], "beckn:Buyer") }
+
+_order_violations contains msg if { msg := _wrong_context("message.order.beckn:buyer", input.message.order["beckn:buyer"], "beckn:Buyer", core_context_url) }
+
+_order_violations contains msg if { msg := _missing_context("message.order.beckn:buyer", input.message.order["beckn:buyer"], "beckn:Buyer", core_context_url) }
+
+# --- Order location: message.order.beckn:fulfillment → beckn:Fulfillment ---
+
+_order_violations contains msg if { msg := _wrong_type("message.order.beckn:fulfillment", input.message.order["beckn:fulfillment"], "beckn:Fulfillment") }
+
+_order_violations contains msg if { msg := _missing_type("message.order.beckn:fulfillment", input.message.order["beckn:fulfillment"], "beckn:Fulfillment") }
+
+_order_violations contains msg if { msg := _wrong_context("message.order.beckn:fulfillment", input.message.order["beckn:fulfillment"], "beckn:Fulfillment", core_context_url) }
+
+_order_violations contains msg if { msg := _missing_context("message.order.beckn:fulfillment", input.message.order["beckn:fulfillment"], "beckn:Fulfillment", core_context_url) }
+
+# --- Order location: beckn:orderItems[*].beckn:acceptedOffer → beckn:Offer ---
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]
+	msg := _wrong_type(sprintf("order item [%d] beckn:acceptedOffer", [i]), obj, "beckn:Offer")
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]
+	msg := _missing_type(sprintf("order item [%d] beckn:acceptedOffer", [i]), obj, "beckn:Offer")
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]
+	msg := _wrong_context(sprintf("order item [%d] beckn:acceptedOffer", [i]), obj, "beckn:Offer", core_context_url)
+}
+
+_order_violations contains msg if {
+	item := input.message.order["beckn:orderItems"][i]
+	obj := item["beckn:acceptedOffer"]
+	msg := _missing_context(sprintf("order item [%d] beckn:acceptedOffer", [i]), obj, "beckn:Offer", core_context_url)
 }
 
 # ===== Action-gated violations (public API) =====
@@ -568,45 +654,326 @@ _publish_violations contains msg if {
 	)
 }
 
+# Publish Rule 5 — Validity-to-delivery gap (mirrors O2)
+_publish_violations contains msg if {
+	offer := input.message.catalogs[_]["beckn:offers"][j]
+	offer_attrs := offer["beckn:offerAttributes"]
+
+	dw := _delivery_window(offer_attrs)
+	dw != null
+	vw := _validity_window(offer_attrs)
+	vw != null
+
+	delivery_start := time.parse_rfc3339_ns(dw["schema:startTime"])
+	validity_end_str := vw["schema:endTime"]
+	validity_end := time.parse_rfc3339_ns(validity_end_str)
+
+	gap_hours := (delivery_start - validity_end) / ns_per_hour
+	gap_hours < min_lead_hours
+
+	msg := sprintf(
+		"catalog offer [%d]: validity window end (%s) is only %v hours before delivery start; minimum gap is %v hours",
+		[j, validity_end_str, gap_hours, min_lead_hours],
+	)
+}
+
+# Publish Rule 5b — Delivery window must be exactly 1 hour (mirrors O3)
+_publish_violations contains msg if {
+	offer := input.message.catalogs[_]["beckn:offers"][j]
+	offer_attrs := offer["beckn:offerAttributes"]
+
+	dw := _delivery_window(offer_attrs)
+	dw != null
+
+	start_str := dw["schema:startTime"]
+	end_str := dw["schema:endTime"]
+	duration_hours := (time.parse_rfc3339_ns(end_str) - time.parse_rfc3339_ns(start_str)) / ns_per_hour
+
+	duration_hours != 1
+
+	msg := sprintf(
+		"catalog offer [%d]: delivery window (%s to %s) is %v hours; must be exactly 1 hour",
+		[j, start_str, end_str, duration_hours],
+	)
+}
+
+# Publish Rule 6 — Currency must be INR (mirrors O6)
+_publish_violations contains msg if {
+	offer := input.message.catalogs[_]["beckn:offers"][j]
+	currency := offer["beckn:price"]["schema:priceCurrency"]
+	currency != "INR"
+
+	msg := sprintf(
+		"catalog offer [%d]: schema:priceCurrency is %q; must be INR",
+		[j, currency],
+	)
+}
+
+# Publish Rule 7 — Quantity unit must be kWh (mirrors O7)
+_publish_violations contains msg if {
+	offer := input.message.catalogs[_]["beckn:offers"][j]
+	unit := offer["beckn:price"].applicableQuantity.unitText
+	unit != "kWh"
+
+	msg := sprintf(
+		"catalog offer [%d]: applicableQuantity.unitText is %q; must be kWh",
+		[j, unit],
+	)
+}
+
+# Publish Rule 8a — Provider utilityCustomerId must be present (mirrors O8)
+_publish_violations contains msg if {
+	item := input.message.catalogs[_]["beckn:items"][i]
+	provider := _catalog_provider(item)
+	not provider.utilityCustomerId
+
+	msg := sprintf(
+		"catalog item [%d]: provider utilityCustomerId is missing",
+		[i],
+	)
+}
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[_]["beckn:items"][i]
+	provider := _catalog_provider(item)
+	provider.utilityCustomerId == ""
+
+	msg := sprintf(
+		"catalog item [%d]: provider utilityCustomerId is empty",
+		[i],
+	)
+}
+
+# Publish Rule 8b — Provider utilityId must be present (mirrors O8)
+_publish_violations contains msg if {
+	item := input.message.catalogs[_]["beckn:items"][i]
+	provider := _catalog_provider(item)
+	not provider.utilityId
+
+	msg := sprintf(
+		"catalog item [%d]: provider utilityId is missing",
+		[i],
+	)
+}
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[_]["beckn:items"][i]
+	provider := _catalog_provider(item)
+	provider.utilityId == ""
+
+	msg := sprintf(
+		"catalog item [%d]: provider utilityId is empty",
+		[i],
+	)
+}
+
+# --- Catalog domain: providerAttributes → EnergyCustomer ---
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[c]["beckn:items"][i]
+	obj := _catalog_provider(item)
+	msg := _wrong_type(sprintf("catalog [%d] item [%d] providerAttributes", [c, i]), obj, "EnergyCustomer")
+}
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[c]["beckn:items"][i]
+	obj := _catalog_provider(item)
+	msg := _missing_type(sprintf("catalog [%d] item [%d] providerAttributes", [c, i]), obj, "EnergyCustomer")
+}
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[c]["beckn:items"][i]
+	obj := _catalog_provider(item)
+	msg := _wrong_context(sprintf("catalog [%d] item [%d] providerAttributes", [c, i]), obj, "EnergyCustomer", _energytrade_context)
+}
+
+_publish_violations contains msg if {
+	item := input.message.catalogs[c]["beckn:items"][i]
+	obj := _catalog_provider(item)
+	msg := _missing_context(sprintf("catalog [%d] item [%d] providerAttributes", [c, i]), obj, "EnergyCustomer", _energytrade_context)
+}
+
+# --- Catalog domain: beckn:itemAttributes → EnergyResource ---
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]["beckn:itemAttributes"]
+	msg := _wrong_type(sprintf("catalog [%d] item [%d] beckn:itemAttributes", [c, i]), obj, "EnergyResource")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]["beckn:itemAttributes"]
+	msg := _missing_type(sprintf("catalog [%d] item [%d] beckn:itemAttributes", [c, i]), obj, "EnergyResource")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]["beckn:itemAttributes"]
+	msg := _wrong_context(sprintf("catalog [%d] item [%d] beckn:itemAttributes", [c, i]), obj, "EnergyResource", _energytrade_context)
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]["beckn:itemAttributes"]
+	msg := _missing_context(sprintf("catalog [%d] item [%d] beckn:itemAttributes", [c, i]), obj, "EnergyResource", _energytrade_context)
+}
+
+# --- Catalog domain: beckn:offerAttributes → EnergyTradeOffer ---
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]["beckn:offerAttributes"]
+	msg := _wrong_type(sprintf("catalog [%d] offer [%d] beckn:offerAttributes", [c, o]), obj, "EnergyTradeOffer")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]["beckn:offerAttributes"]
+	msg := _missing_type(sprintf("catalog [%d] offer [%d] beckn:offerAttributes", [c, o]), obj, "EnergyTradeOffer")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]["beckn:offerAttributes"]
+	msg := _wrong_context(sprintf("catalog [%d] offer [%d] beckn:offerAttributes", [c, o]), obj, "EnergyTradeOffer", _energytrade_context)
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]["beckn:offerAttributes"]
+	msg := _missing_context(sprintf("catalog [%d] offer [%d] beckn:offerAttributes", [c, o]), obj, "EnergyTradeOffer", _energytrade_context)
+}
+
+# --- Catalog location: message.catalogs[*] → beckn:Catalog ---
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]
+	msg := _wrong_type(sprintf("catalog [%d]", [c]), obj, "beckn:Catalog")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]
+	msg := _missing_type(sprintf("catalog [%d]", [c]), obj, "beckn:Catalog")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]
+	msg := _wrong_context(sprintf("catalog [%d]", [c]), obj, "beckn:Catalog", core_context_url)
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]
+	msg := _missing_context(sprintf("catalog [%d]", [c]), obj, "beckn:Catalog", core_context_url)
+}
+
+# --- Catalog location: beckn:items[*] → beckn:Item ---
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]
+	msg := _wrong_type(sprintf("catalog [%d] item [%d]", [c, i]), obj, "beckn:Item")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]
+	msg := _missing_type(sprintf("catalog [%d] item [%d]", [c, i]), obj, "beckn:Item")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]
+	msg := _wrong_context(sprintf("catalog [%d] item [%d]", [c, i]), obj, "beckn:Item", core_context_url)
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:items"][i]
+	msg := _missing_context(sprintf("catalog [%d] item [%d]", [c, i]), obj, "beckn:Item", core_context_url)
+}
+
+# --- Catalog location: beckn:offers[*] → beckn:Offer ---
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]
+	msg := _wrong_type(sprintf("catalog [%d] offer [%d]", [c, o]), obj, "beckn:Offer")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]
+	msg := _missing_type(sprintf("catalog [%d] offer [%d]", [c, o]), obj, "beckn:Offer")
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]
+	msg := _wrong_context(sprintf("catalog [%d] offer [%d]", [c, o]), obj, "beckn:Offer", core_context_url)
+}
+
+_publish_violations contains msg if {
+	obj := input.message.catalogs[c]["beckn:offers"][o]
+	msg := _missing_context(sprintf("catalog [%d] offer [%d]", [c, o]), obj, "beckn:Offer", core_context_url)
+}
+
 # ===== Test ID consistency (non-publish actions) =====
 #
-# If any provider on an order item uses a test identifier (meterId or utilityId
-# starting with "TEST_"), the buyer must also use test identifiers:
-#   - buyer meterId = TEST_METER_BUYER
-#   - buyer utilityId = TEST_DISCOM_BUYER
+# If ANY party (buyer OR any provider) uses a test identifier (meterId or
+# utilityId starting with "TEST_"), ALL parties must use test identifiers:
+#   - buyer meterId    = TEST_METER_BUYER
+#   - buyer utilityId  = TEST_DISCOM_BUYER
+#   - every provider meterId   must start with "TEST_"
+#   - every provider utilityId must start with "TEST_"
 
-_any_provider_is_test if {
+_any_party_is_test if { startswith(_buyer_meter_id, "TEST_") }
+
+_any_party_is_test if { startswith(_buyer_utility_id, "TEST_") }
+
+_any_party_is_test if {
 	item := input.message.order["beckn:orderItems"][_]
 	provider := item["beckn:orderItemAttributes"].providerAttributes
 	startswith(provider.meterId, "TEST_")
 }
 
-_any_provider_is_test if {
+_any_party_is_test if {
 	item := input.message.order["beckn:orderItems"][_]
 	provider := item["beckn:orderItemAttributes"].providerAttributes
 	startswith(provider.utilityId, "TEST_")
 }
 
-# Test consistency: buyer meterId must be TEST_METER_BUYER
+# T1 – buyer meterId must be TEST_METER_BUYER
 _test_consistency_violations contains msg if {
-	_any_provider_is_test
+	_any_party_is_test
 	buyer_mid := _buyer_meter_id
 	buyer_mid != "TEST_METER_BUYER"
 
 	msg := sprintf(
-		"test consistency: provider uses test identifiers but buyer meterId is %q; must be TEST_METER_BUYER",
+		"test consistency: a party uses test identifiers but buyer meterId is %q; must be TEST_METER_BUYER",
 		[buyer_mid],
 	)
 }
 
-# Test consistency: buyer utilityId must be TEST_DISCOM_BUYER
+# T1 – buyer utilityId must be TEST_DISCOM_BUYER
 _test_consistency_violations contains msg if {
-	_any_provider_is_test
+	_any_party_is_test
 	buyer_uid := _buyer_utility_id
 	buyer_uid != "TEST_DISCOM_BUYER"
 
 	msg := sprintf(
-		"test consistency: provider uses test identifiers but buyer utilityId is %q; must be TEST_DISCOM_BUYER",
+		"test consistency: a party uses test identifiers but buyer utilityId is %q; must be TEST_DISCOM_BUYER",
 		[buyer_uid],
+	)
+}
+
+# T1 – each provider meterId must start with TEST_
+_test_consistency_violations contains msg if {
+	_any_party_is_test
+	item := input.message.order["beckn:orderItems"][i]
+	provider := item["beckn:orderItemAttributes"].providerAttributes
+	not startswith(provider.meterId, "TEST_")
+
+	msg := sprintf(
+		"test consistency: a party uses test identifiers but order item [%d] provider meterId is %q; must start with TEST_",
+		[i, provider.meterId],
+	)
+}
+
+# T1 – each provider utilityId must start with TEST_
+_test_consistency_violations contains msg if {
+	_any_party_is_test
+	item := input.message.order["beckn:orderItems"][i]
+	provider := item["beckn:orderItemAttributes"].providerAttributes
+	not startswith(provider.utilityId, "TEST_")
+
+	msg := sprintf(
+		"test consistency: a party uses test identifiers but order item [%d] provider utilityId is %q; must start with TEST_",
+		[i, provider.utilityId],
 	)
 }

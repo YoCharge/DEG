@@ -4,6 +4,8 @@ Goal of this devkit is to enable a developer to test round trip Beckn v2.0 mock 
 
 It is a *batteries included* sandbox environment that requires minimal setup, and has environment variables pre-configured, connections to Catalog Discovery Service and Dedi test registry service pre-configured.
 
+![P2P Routing Diagram](./assets/p2p-routing-diagram.png)
+
 ## Setup
 
 1. Install [docker desktop](https://www.docker.com/products/docker-desktop) & run it in background.
@@ -25,7 +27,7 @@ cd DEG/testnet/p2p-trading-interdiscom-devkit/install
 
 ## Test network
 
-1. Spin up the containers using docker compose. Verify that the following containers are running: redis, onix-bap, onix-bpp, onix-utilitybpp, sandbox-bap, sandbox-bpp, sandbox-utilitybpp. You can also navigate to docker desktop and check the containers and their logs.
+1. Spin up the containers using docker compose. Verify that the following containers are running: redis, onix-bap, onix-bpp, sandbox-bap, sandbox-bpp. You can also navigate to docker desktop and check the containers and their logs.
     ```
     docker compose -f ./docker-compose-adapter-p2p.yml up -d --build
     docker ps
@@ -41,11 +43,7 @@ cd DEG/testnet/p2p-trading-interdiscom-devkit/install
 
 6. Use the collection `P2P-Trading:BPP-DEG` (on_select, on_init, on_confirm, on_status) to test only the BPP to BAP trip Beckn v2.0 mock messages between BPP to BAP.
 
-7. Use the collection `P2P-Trading:BPP-DEG` (cascaded_init) to test only the BPP to Utility BPP round trip Beckn v2.0 mock messages. The query reponse will show an "Ack" message, and detailed `on_init`, `on_confirm`, `on_status` messages from Utility BPP should be visible in the Prosumer BPP logs.
-
-8. Use the collection `P2P-Trading:UtilityBPP-DEG` (cascaded_init) to test only the Utility BPP to prosumer BPP Beckn v2.0 mock messages. The query reponse will show an "Ack" message, and detailed `on_init`, `on_confirm`, `on_status` messages from Utility BPP should be visible in the Prosumer BPP logs.
-
-9. Stop the containers using docker compose
+7. Stop the containers using docker compose
     ```
     docker compose -f ./docker-compose-adapter-p2p.yml down
     ```
@@ -53,8 +51,8 @@ cd DEG/testnet/p2p-trading-interdiscom-devkit/install
 ## Under the hood
 
 1. BAP `discover` calls are routed to Catalog Discovery Service url `https://34.93.141.21.sslip.io/beckn` defined [here](./config/local-p2p-routing-BuyerBAPCaller.yaml)
-2. Public keys from network participants are fetched from Beckn One registry service `http://api.dev.beckn.io/registry/dedi` which acts as a cache layer on top of Dedi registry, and are used to confirm that Beckn messages are sent by the trusted actor (and not by an imposter). The namespace and registry entries in Dedi are preconfigured in yaml files within config folder. The process of creating a DiDi namespace and registries is defined [here](https://beckn-labs.gitbook.io/beckn-labs-docs/beckn-registry/publishing-subscriber-details) and also further down on this page. For testing, it is recommended to create records in Dedi registry which are then cached by Beckn One registry service every hour. The registry records such as `p2p-trading-sandbox1.com` (BAP), `p2p-trading-sandbox2.com` (BPP), `p2p-trading-sandbox3.com` (utility BPP) were added beforehand, and used in this devkit. An example API call during runtime to registry service looks like [this](https://api.dev.beckn.io/registry/dedi/lookup/p2p-trading-sandbox1.com/subscribers.beckn.one/76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ).
-3. Routing rules within each actor are defined in config for [BAP](./config/local-p2p-bap.yaml), [BPP](./config/local-p2p-bpp.yaml), [Utility BPP](./config/local-p2p-utilitybpp.yaml).
+2. Public keys from network participants are fetched from Beckn One registry service `http://api.dev.beckn.io/registry/dedi` which acts as a cache layer on top of Dedi registry, and are used to confirm that Beckn messages are sent by the trusted actor (and not by an imposter). The namespace and registry entries in Dedi are preconfigured in yaml files within config folder. The process of creating a DiDi namespace and registries is defined [here](https://beckn-labs.gitbook.io/beckn-labs-docs/beckn-registry/publishing-subscriber-details) and also further down on this page. For testing, it is recommended to create records in Dedi registry which are then cached by Beckn One registry service every hour. The registry records such as `p2p-trading-sandbox1.com` (BAP), `p2p-trading-sandbox2.com` (BPP) were added beforehand, and used in this devkit. An example API call during runtime to registry service looks like [this](https://api.dev.beckn.io/registry/dedi/lookup/p2p-trading-sandbox1.com/subscribers.beckn.one/76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ).
+3. Routing rules within each actor are defined in config for [BAP](./config/local-p2p-bap.yaml), [BPP](./config/local-p2p-bpp.yaml).
 4. Network between various actors is defined in docker-compose-adapter-p2p.yml
 5. Variables are preconfigured to following values.
     | Variable Name               | Value                                      | Notes                       |
@@ -66,24 +64,13 @@ cd DEG/testnet/p2p-trading-interdiscom-devkit/install
     | `bpp_id`                    | `p2p-trading-sandbox2.com`                 |                             |
     | `bpp_uri`                   | `http://onix-bpp:8082/bpp/receiver`        |                             |
     | `bpp_bapreceiver_uri`       | `http://onix-bpp:8082/bap/receiver`        |                             |
-    | `utilitybpp_id`             | `p2p-trading-sandbox3.com`                 |                             |
-    | `utilitybpp_uri`            | `http://onix-utilitybpp:8083/bpp/receiver` |                             |
     | `bap_adapter_url`           | `http://localhost:8081/bap/caller`         | BAP collection only         |
     | `bpp_adapter_url`           | `http://localhost:8082/bpp/caller`         | BPP collection only         |
     | `bpp_adapter_bapcaller_url` | `http://localhost:8082/bap/caller`         | BPP collection only         |
-    | `utilitybpp_adapter_url`    | `http://localhost:8083/bpp/caller`         | Utility BPP collection only |
     | `transaction_id`            | `3769776b-88b4-469d-9ee2-95044fe5dafc`     |                             |
     | `iso_date`                  | `2025-01-01T10:00:00Z`                     |                             |
     | `cds_url`                   | `https://34.93.141.21.sslip.io`            | CDS Upload collection only  |
 
-## Routing
-
-<details>
-<summary>P2P Routing Diagram</summary>
-
-![P2P Routing Diagram](./assets/p2p-routing-diagram.png)
-
-</details>
 
 ## Next steps towards a production network:
 
@@ -100,7 +87,7 @@ A more complete documentation is located [here](https://beckn-labs.gitbook.io/be
 
 
 - Registered in the DeDi [dev website](https://publish-test.dedi.global/) and created two
-  unverified (verification happens when you own a fully qualified domain name, and can store a publicly viewable dedi verification file on it) namespaces. Namespaces should be one per atomic entity like an organization. Here it was created for utility and a network participant
+  unverified (verification happens when you own a fully qualified domain name, and can store a publicly viewable dedi verification file on it) namespaces. Namespaces should be one per atomic entity like an organization. Here it was created for a network participant
   which is both a BAP & BPP. Ideally each network participant should claim their own namespace, add registries to it, create registry records within each registry (say for their BAP and BPP).
   
   <details>
@@ -134,14 +121,6 @@ A more complete documentation is located [here](https://beckn-labs.gitbook.io/be
   ![BPP sandbox 2 registry record](./assets/dedi-np-registry-record-bpp.png)
   
   </details>
-- And another one for utility BPP.
-  
-  <details>
-  <summary>Utility BPP sandbox 3 registry record</summary>
-  
-  ![Utility BPP sandbox 3 registry record](./assets/dedi-utility-registry-record-utilitybpp.png)
-  
-  </details>
 - Within the beckn-onix configuration (`config/*.yaml` files) use the `networkParticipant` (`subscriber_id` from DeDi setup), `keyId` (Record ID from DeDi setup) along with the signing & encryption private and public keys.
 - Finally enable caching of the DeDi registry  by registry service by completeing last step from [these instructions](https://beckn-labs.gitbook.io/beckn-labs-docs/beckn-registry/publishing-subscriber-details).
 
@@ -153,7 +132,6 @@ To regenerate the Postman collections for this devkit:
 # From DEG repository root
 python3 scripts/generate_postman_collection.py --devkit p2p-trading-interdiscom --role BAP --output-dir testnet/p2p-trading-interdiscom-devkit/postman
 python3 scripts/generate_postman_collection.py --devkit p2p-trading-interdiscom --role BPP --output-dir testnet/p2p-trading-interdiscom-devkit/postman
-python3 scripts/generate_postman_collection.py --devkit p2p-trading-interdiscom --role UtilityBPP --output-dir testnet/p2p-trading-interdiscom-devkit/postman
 ```
 
-This devkit uses the `EnergyTradeOrderInterUtility` schema which extends `EnergyTradeOrder` with utility/discom identifiers (`utilityIdBuyer`, `utilityIdSeller`) for inter-discom P2P trading scenarios.
+This devkit uses the `EnergyTradeOrder` schema ith utility/discom identifiers (`utilityIdBuyer`, `utilityIdSeller`) for inter-discom P2P trading scenarios.
